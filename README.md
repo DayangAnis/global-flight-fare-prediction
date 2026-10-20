@@ -1,92 +1,47 @@
 # Global Flight Fare Prediction: Data Preprocessing & Integration
 
-A collaborative machine learning project investigating global flight fare prediction using crude oil prices, airline financial indicators, fuel surcharges, route disruptions and geopolitical events.
+A collaborative Master of Data Science project exploring global flight fare prediction using aviation, oil-market, airline-financial, route-disruption and geopolitical-event data.
 
-## Project Overview
+**Portfolio focus:** my contribution to data preprocessing and integration. The modelling metrics below are group-level results from the project report, not results attributable to preprocessing alone.
 
-Flight fares are influenced by multiple interacting factors, including route characteristics, passenger demand, fuel prices and geopolitical disruptions. This project integrates multiple aviation and energy-market datasets to prepare a unified dataset for machine learning-based flight fare prediction.
+## Why this project matters
 
-**My primary contribution: Data preprocessing and integration.**
+Real-world analytical datasets often differ in granularity, data types, completeness and naming conventions. This project integrates six heterogeneous tables and prepares a consolidated dataset for regression modelling.
 
-I worked on preparing heterogeneous datasets for downstream modelling, with an emphasis on data quality, multi-source integration, temporal alignment, feature transformation and data integrity.
+## My contribution: preprocessing
 
-## Technical Stack
+- **Data inspection and cleaning:** reviewed dimensions, types, missingness, duplicates and outliers; corrected an airline-name inconsistency.
+- **Multi-source integration:** used sequential left joins with the ticket-price table as the base.
+- **Granularity alignment:** aggregated surcharge and route records to airline-month level before joining, reducing the risk of unintended row multiplication.
+- **Temporal alignment:** aligned selected quarterly airline financial variables with monthly observations using interpolation or forward-fill according to variable type.
+- **Transformation:** converted temporal and binary variables and encoded ordered and nominal categories.
+- **Data reduction:** removed redundant columns and investigated target-derived features that could leak information about the target.
+- **Feature engineering:** extracted temporal components and applied cyclical encoding to month-of-year.
 
-- **Language:** Python
-- **Data manipulation:** pandas, NumPy
-- **Exploratory data analysis:** Matplotlib, Seaborn
-- **Machine learning:** scikit-learn, XGBoost
-- **Environment:** Jupyter Notebook
+> The notebook is adapted from the original group coursework for portfolio presentation. Any additional refactoring or documentation added here is a portfolio improvement and should not be confused with the original group contribution.
 
-## Data Sources
+## Data sources
 
-The project uses six datasets from the [Kaggle Airline Ticket Prices vs Oil and Fuel Costs dataset](https://www.kaggle.com/datasets/zkskhurram/airline-ticket-prices-vs-oil-and-fuel-costs):
+The group project used six CSV files from the public Kaggle dataset:
 
-1. Airline ticket prices
-2. Airline financial impact
-3. Oil and jet fuel prices
-4. Fuel surcharges
-5. Route cost impact
-6. Conflict and oil events
+[Airline Ticket Prices vs Oil and Fuel Costs — Kaggle](https://www.kaggle.com/datasets/zkskhurram/airline-ticket-prices-vs-oil-and-fuel-costs)
 
-The ticket-price dataset served as the base table, with `fare_total_usd` as the prediction target.
+1. `airline_ticket_prices.csv`
+2. `oil_jet_fuel_prices.csv`
+3. `fuel_surcharges.csv`
+4. `route_cost_impact.csv`
+5. `airline_financial_impact.csv`
+6. `conflict_oil_events.csv`
 
-## My Contribution: Data Preprocessing
+The ticket-price table was used as the base table, and `fare_total_usd` was the prediction target. **Raw data is intentionally not included**; please obtain it from the original source and comply with its terms.
 
-### 1. Data Quality Assessment and Cleaning
+## Pipeline overview
 
-- Inspected dataset dimensions, column structures, descriptive statistics and missing-value patterns.
-- Investigated missing data and distinguished structural missingness from values requiring imputation.
-- Checked for duplicate records and corrected inconsistent airline naming across datasets.
-- Used box plots and the interquartile range (IQR) rule to investigate outliers, retaining observations judged to represent legitimate extreme values rather than automatically removing them.
+![Data preprocessing pipeline](docs/preprocessing_pipeline.png)
 
-### 2. Multi-Source Data Integration
+The integration strategy aggregates tables with multiple rows per airline-month before joining them to ticket-level observations. Quarterly financial data is aligned to monthly observations using the approach documented in the notebook. These choices involve assumptions and should be reviewed for any new use case.
 
-- Integrated six datasets through five sequential left-join operations.
-- Selected appropriate join keys based on temporal and entity-level relationships.
-- Aggregated surcharge records to airline-month level and route-cost records to airline-month level before merging, reducing the risk of unintended row multiplication.
-- Aligned quarterly airline financial indicators with monthly observations using linear interpolation for selected continuous variables and forward-filling for selected stock or policy variables.
-- Reviewed missing values introduced or exposed during integration.
-
-### 3. Data Transformation and Feature Preparation
-
-- Converted temporal variables into pandas datetime representations.
-- Converted binary disruption indicators into numerical values.
-- Applied ordinal encoding to ordered categories and one-hot encoding to nominal categorical variables.
-- Extracted temporal components and applied cyclical encoding to represent month-of-year patterns.
-
-### 4. Data Reduction and Integrity
-
-- Removed redundant columns and duplicate tracking information.
-- Identified target-derived variables that could cause data leakage and removed them from the predictor set.
-- Reduced redundancy among correlated energy-market variables and identifiers.
-- Reviewed records with missing airline financial context before determining which observations could be retained.
-
-## Project Workflow
-
-1. Inspect and clean the six source datasets.
-2. Aggregate and integrate datasets with different levels of granularity.
-3. Transform categorical and temporal variables.
-4. Remove redundant or potentially leakage-prone features.
-5. Prepare the consolidated dataset for machine learning.
-6. Evaluate regression models and investigate feature selection and hyperparameter optimisation as part of the wider group project.
-
-## Group Project Results
-
-The group evaluated Linear Regression, Random Forest and XGBoost before comparing feature-selection strategies and tuning the XGBoost model.
-
-The group report recorded the following results for the final tuned XGBoost model using Recursive Feature Elimination (RFE):
-
-| Metric | Reported result |
-|---|---:|
-| RMSE | 186.38 |
-| MAE | 86.93 |
-| R² | 0.9843 |
-| Selected features | 22 |
-
-These are **group-level modelling results**, not results attributable solely to my preprocessing contribution.
-
-## Repository Structure
+## Repository structure
 
 ```text
 global-flight-fare-prediction/
@@ -95,31 +50,76 @@ global-flight-fare-prediction/
 │   └── data_preprocessing.ipynb
 ├── src/
 │   └── preprocessing/
+│       ├── __init__.py
+│       └── utilities.py
+├── tests/
+│   └── test_utilities.py
 ├── docs/
-│   └── preprocessing_pipeline.png
+│   ├── preprocessing_pipeline.png
+│   └── preprocessing_pipeline.mmd
 ├── reports/
+│   └── data_quality_checklist.md
+├── data/
+│   └── README.md
 ├── requirements.txt
-└── .gitignore
+├── .gitignore
+└── LICENSE
 ```
 
-## Reproducibility
+## Reproduce the notebook
 
-The notebook uses Python data analysis libraries to inspect, clean, integrate and transform the source datasets.
+### 1. Create an environment
 
-To reproduce the workflow:
-1. Install the dependencies listed in `requirements.txt`.
-2. Obtain the source data from the linked Kaggle dataset.
-3. Run the preprocessing notebook sequentially.
-4. Verify the resulting dataset dimensions and data-quality checks.
+Python 3.10 or 3.11 is recommended.
 
-## Limitations and Future Improvements
+```bash
+python -m venv .venv
+# macOS/Linux
+source .venv/bin/activate
+# Windows PowerShell
+# .venv\Scripts\Activate.ps1
 
-- Validate the integrated dataset against the original source tables and document the treatment of missing observations.
-- Explore a time-based train-test split to better reflect future airfare prediction.
-- Package the preprocessing workflow into reusable Python functions.
-- Add automated data-quality checks and a data dictionary.
-- Investigate whether alternative temporal alignment methods improve the reliability of interpolated financial features.
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+### 2. Run the notebook
+
+```bash
+jupyter lab
+```
+
+Open `notebooks/data_preprocessing.ipynb` and run the cells from top to bottom. The original notebook downloads the dataset using `kagglehub`; this requires internet access. If the dataset download fails, download the CSV files from the Kaggle page and update the data-loading cell to point to your local data directory.
+
+### 3. Run the portfolio utility tests
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+These tests cover the small reusable helper functions in `src/preprocessing/utilities.py`. They do not substitute for executing the complete data pipeline against the source dataset.
+
+## Group-level modelling results
+
+The group report records the following results for a tuned XGBoost model using Recursive Feature Elimination (RFE):
+
+| Metric | Reported result |
+|---|---:|
+| RMSE | 186.38 |
+| MAE | 86.93 |
+| R² | 0.9843 |
+| Selected features | 22 |
+
+These are results reported by the group for the wider modelling project. They are not a measure of my individual preprocessing contribution. Re-run the modelling workflow and validate the evaluation design before interpreting these scores as expected generalisation performance.
+
+## Limitations and future improvements
+
+- **Time-aware evaluation:** explore a chronological train-test split rather than relying only on random splitting for time-dependent data.
+- **Leakage-safe preprocessing:** fit imputers, encoders and feature-selection steps on training data only.
+- **Interpolation assumptions:** assess the impact of converting quarterly indicators into monthly estimates.
+- **Data validation:** add schema checks, join-cardinality checks and explicit row-count assertions at each integration stage.
+- **Reproducibility:** pin dependency versions and record the dataset version and source date.
 
 ## Acknowledgements
 
-This was a collaborative group project completed for the Machine Learning for Data Science module at the University of Malaya. The modelling results and project outcomes reflect the work of the group.
+This was a collaborative group project completed for the Machine Learning for Data Science module at the University of Malaya. The repository highlights my preprocessing focus while acknowledging that modelling and overall project outcomes were produced collaboratively.
